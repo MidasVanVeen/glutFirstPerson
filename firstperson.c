@@ -4,13 +4,12 @@
 
 static int win_id;
 static int win_y, win_x;
-static int rotate_x, rotate_y;
 static int omx, omy, mx, my;
 static int mouse_down[3];
 
 static int g_viewport_width = 0;
 static int g_viewport_height = 0;
-const float g_rotation_speed = M_PI/180*0.02;
+const float g_rotation_speed = M_PI / 180 * 0.02;
 static float c_yaw = 0.0;
 static float c_pitch = 0.0;
 static float c_x, c_y, c_z;
@@ -24,6 +23,19 @@ static void c_Refresh(void) {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   gluLookAt(c_x, c_y, c_z, c_x + c_lx, c_y + c_ly, c_z + c_lz, 0.0, 1.0, 0.0);
+}
+
+static void c_RotatePitch(float angle) {
+  const float limit = 89.0 * M_PI / 180.0;
+
+  c_pitch -= angle;
+
+  if (c_pitch < -limit)
+    c_pitch = -limit;
+  if (c_pitch > limit)
+    c_pitch = limit;
+
+  c_Refresh();
 }
 
 static void c_SetPos(float x, float y, float z) {
@@ -116,7 +128,7 @@ static void motion_func(int x, int y) {
   }
 
   if (dy) {
-    c_pitch += g_rotation_speed * dy;
+    c_RotatePitch(g_rotation_speed * dy);
   }
 
   glutWarpPointer(g_viewport_width / 2, g_viewport_height / 2);
@@ -164,9 +176,9 @@ static void open_glut_window(void) {
 int main(int argc, char *argv[]) {
   glutInit(&argc, argv);
 
-
   win_x = 640;
   win_y = 480;
+  c_SetPos(1, 1, 1);
 
   open_glut_window();
   glutMainLoop();
